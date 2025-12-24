@@ -23,7 +23,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.noalbs_tag }}
-          name: "NOALBS ${{ github.event.inputs.noalbs_tag }} - All Linux Architectures"
+          name: "NOALBS ${{ github.event.inputs.noalbs_tag }} - Linux"
           body: |
             # NOALBS ${{ github.event.inputs.noalbs_tag }} Linux Builds
             
