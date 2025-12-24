@@ -1,0 +1,53 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"  
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    - match:
+        dependency-name: "dtolnay/rust-toolchain"
+        update-types: ["version-update:semver-patch"]
+      rebase-strategy: "auto"
+    - match:
+        dependency-name: "softprops/action-gh-release"
+        update-types: ["version-update:semver-patch"]
+      rebase-strategy: "auto"
+    - match:
+        dependency-name: "actions/checkout"
+        update-types: ["version-update:semver-patch"]
+      rebase-strategy: "auto"
+    - match:
+        dependency-name: "actions/upload-release-asset"
+        update-types: ["version-update:semver-patch"]
+      rebase-strategy: "auto"
+labels:
+  - "dependencies"
+  - "automerge"
+automerged-updates:
+  - match:
+      dependency-name: "dtolnay/rust-toolchain"
+      update-type: "version-update:semver-patch"
+    type: "pr"
+  - match:
+      dependency-name: "actions/*"
+      update-type: "version-update:semver-patch"
+    type: "pr"
+commit-message:
+  prefix: "deps"
+  include: "scope"
+pull-request-branch-name: "dependabot/github-actions/*"
+versioning-strategy: "increase"
+security-updates:
+  schedule:
+    interval: "daily"
+  open-pull-requests-limit: 5
