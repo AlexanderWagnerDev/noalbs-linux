@@ -107,14 +107,9 @@ jobs:
               echo "No special cross-compiler needed for ${{ matrix.target }}" ;;
           esac
           
-          git clone --depth 1 https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
-          cd noalbs-src
-          
           TAG="${{ github.event.inputs.noalbs_tag }}"
-          if [ "$TAG" != "main" ]; then
-            git fetch --depth 1 origin "refs/tags/$TAG"
-            git checkout "$TAG"
-          fi
+          git clone --depth 1 --branch "$TAG" https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
+          cd noalbs-src
           
           export PKG_CONFIG_ALLOW_CROSS=1
           cargo build --release --target ${{ matrix.target }}
