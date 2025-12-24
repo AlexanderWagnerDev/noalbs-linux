@@ -1,149 +1,114 @@
-name: NOALBS Linux Builder
-
+name: Noalbs Linux Builder
 on:
   workflow_dispatch:
     inputs:
       noalbs_tag:
-        description: 'NOALBS Tag/Commit (e.g. "main", "v2.16.0", commit-hash)'
+        description: 'Noalbs Tag (z.B. v2.16.0)'
         required: true
-        default: 'main'
+        default: 'v2.16.0'
         type: string
 
 permissions:
   contents: write
 
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.event.inputs.noalbs_tag }}
-          name: "NOALBS ${{ github.event.inputs.noalbs_tag }} - Linux"
-          body: |
-            # NOALBS ${{ github.event.inputs.noalbs_tag }} Linux Builds
-            
-            **Source**: https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/${{ github.event.inputs.noalbs_tag }}
-            
-            | Arch          | Download |
-            |---------------|----------|
-            | x86_64        | [noalbs-linux-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64.tar.gz) |
-            | x86_64-musl   | [noalbs-linux-x86_64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64-musl.tar.gz) |
-            | i686          | [noalbs-linux-i686.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i686.tar.gz) |
-            | ARM64         | [noalbs-linux-aarch64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64.tar.gz) |
-            | ARM64-musl    | [noalbs-linux-aarch64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64-musl.tar.gz) |
-            | ARMv7         | [noalbs-linux-armv7hf.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7hf.tar.gz) |
-            | ARM           | [noalbs-linux-arm.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm.tar.gz) |
-            | RISC-V        | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) |
-            | PowerPC       | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) |
-            | s390x         | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) |
-            
-            **[All Downloads](https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }})**
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   build:
-    needs: create-release
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        target: [amd64, i386, arm64, armv7, ppc64le, s390x, riscv64]
         include:
-          - target: x86_64-unknown-linux-gnu
-            archive: x86_64
-          - target: x86_64-unknown-linux-musl
-            archive: x86_64-musl
-          - target: i686-unknown-linux-gnu
-            archive: i686
-          - target: aarch64-unknown-linux-gnu
-            archive: aarch64
-          - target: aarch64-unknown-linux-musl
-            archive: aarch64-musl
-          - target: armv7-unknown-linux-gnueabihf
-            archive: armv7hf
-          - target: arm-unknown-linux-gnueabi
-            archive: arm
-          - target: riscv64gc-unknown-linux-gnu
-            archive: riscv64
-          - target: powerpc64le-unknown-linux-gnu
-            archive: ppc64le
-          - target: s390x-unknown-linux-gnu
-            archive: s390x
+          - target: amd64
+            platform: linux/amd64
+            archive: noalbs-linux-amd64.tar.gz
+          - target: i386
+            platform: linux/386
+            archive: noalbs-linux-i386.tar.gz
+          - target: arm64
+            platform: linux/arm64
+            archive: noalbs-linux-arm64.tar.gz
+          - target: armv7
+            platform: linux/arm/v7
+            archive: noalbs-linux-armv7.tar.gz
+          - target: ppc64le
+            platform: linux/ppc64le
+            archive: noalbs-linux-ppc64le.tar.gz
+          - target: s390x
+            platform: linux/s390x
+            archive: noalbs-linux-s390x.tar.gz
+          - target: riscv64
+            platform: linux/riscv64
+            archive: noalbs-linux-riscv64.tar.gz
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    
+    - name: Docker Buildx
+      uses: docker/setup-buildx-action@v3
       
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-      
-      - name: Install Dependencies & Clone NOALBS
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y pkg-config libssl-dev build-essential
+    - name: Build ${{ matrix.target }}
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        load: true
+        platforms: ${{ matrix.platform }}
+        tags: noalbs-${{ matrix.target }}
+        build-args: |
+          NOALBS_TAG=${{ github.event.inputs.noalbs_tag }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Extract Paket
+      run: |
+        docker create --name temp noalbs-${{ matrix.target }}
+        docker cp temp:/noalbs/target/*/*/release/noalbs ./noalbs
+        docker cp temp:/noalbs/config.json ./config.json
+        docker cp temp:/noalbs/.env ./.env || echo "PORT=8080" > .env
+        docker rm temp
+        tar -czf ${{ matrix.archive }} noalbs config.json .env
+        sha256sum ${{ matrix.archive }} > ${{ matrix.archive }}.sha256
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.archive }}
+        path: |
+          ${{ matrix.archive }}
+          ${{ matrix.archive }}.sha256
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: ./releases
+        
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.event.inputs.noalbs_tag }}
+        name: "NOALBS ${{ github.event.inputs.noalbs_tag }} - Linux"
+        body: |
+          # NOALBS ${{ github.event.inputs.noalbs_tag }} Linux Builds
           
-          sudo dpkg --add-architecture i386
-          sudo apt-get update -qq
-          sudo apt-get install -y gcc-multilib libc6-dev-i386 libssl-dev:i386
+          **Source**: https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/${{ github.event.inputs.noalbs_tag }}
           
-          # Musl Tools
-          case "${{ matrix.target }}" in
-            "x86_64-unknown-linux-musl")
-              sudo apt-get install -y musl-tools ;;
-            "aarch64-unknown-linux-musl")
-              sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
-              sudo ln -s /usr/bin/aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-musl-gcc
-              sudo ln -s /usr/aarch64-linux-gnu/lib /usr/aarch64-linux-gnu/lib64 ;;
-          esac
+          | Arch          | Download |
+          |---------------|----------|
+          | x86_64        | [noalbs-linux-amd64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-amd64.tar.gz) |
+          | i686          | [noalbs-linux-i386.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i386.tar.gz) |
+          | ARM64         | [noalbs-linux-arm64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm64.tar.gz) |
+          | ARMv7         | [noalbs-linux-armv7.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7.tar.gz) |
+          | RISC-V        | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) |
+          | PowerPC       | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) |
+          | s390x         | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) |
           
-          # Glibc Cross-Compilers + OpenSSL (konditional) → FIX!
-          case "${{ matrix.target }}" in
-            "riscv64gc-unknown-linux-gnu")
-              sudo apt-get install -y gcc-riscv64-linux-gnu libc6-dev-riscv64-cross libssl-dev-riscv64-cross || true ;;
-            "aarch64-unknown-linux-gnu")
-              sudo apt-get install -y gcc-aarch64-linux-gnu libssl-dev-arm64-cross || true ;;
-            "armv7-unknown-linux-gnueabihf")
-              sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libssl-dev-armhf-cross || true ;;
-            "s390x-unknown-linux-gnu")
-              sudo apt-get install -y gcc-s390x-linux-gnu libc6-dev-s390x-cross libssl-dev-s390x-cross || true ;;
-            "powerpc64le-unknown-linux-gnu")
-              sudo apt-get install -y gcc-powerpc64le-linux-gnu ;;
-            "arm-unknown-linux-gnueabi")
-              sudo apt-get install -y gcc-arm-linux-gnueabi libc6-dev-armel-cross libssl-dev-armel-cross || true ;;
-          esac
-          
-          TAG="${{ github.event.inputs.noalbs_tag }}"
-          git clone --depth 1 --branch "$TAG" https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
-      
-      - name: Cache Rust
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: noalbs-src
-      
-      - name: Build NOALBS
-        run: |
-          cd noalbs-src
-          export PKG_CONFIG_ALLOW_CROSS=1
-          cargo build --release --target ${{ matrix.target }}
-      
-      - name: Package Binary
-        run: |
-          mkdir -p dist
-          cp noalbs-src/target/${{ matrix.target }}/release/noalbs dist/
-          cd dist
-          tar czf noalbs-linux-${{ matrix.archive }}.tar.gz noalbs
-          cd ..
-      
-      - name: Upload Release Asset
-        uses: softprops/action-gh-release@v2
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          assets: ./dist/noalbs-linux-${{ matrix.archive }}.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          **[All Downloads](https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }})**
+        draft: false
+        prerelease: false
+        files: |
+          releases/noalbs-linux-*/noalbs-linux-*.tar.gz
+          releases/noalbs-linux-*/noalbs-linux-*.tar.gz.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
