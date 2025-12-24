@@ -28,5 +28,6 @@ RUN case "$TARGETPLATFORM" in \
     "linux/ppc64le") TARGET="powerpc64le-unknown-linux-musl" ;; \
     *) TARGET="x86_64-unknown-linux-musl" ;; \
     esac && \
-    rustup target add $TARGET && \
-    OPENSSL_STATIC=1 cargo build --release --target $TARGET
+    PKG_CONFIG_ALLOW_CROSS=1 \
+    OPENSSL_STATIC=1 \
+    cargo build --release --target $TARGET
