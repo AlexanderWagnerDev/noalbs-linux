@@ -55,17 +55,28 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: x86_64-unknown-linux-gnu        ; archive: x86_64
-          - target: x86_64-unknown-linux-musl       ; archive: x86_64-musl
-          - target: i686-unknown-linux-gnu          ; archive: i686
-          - target: i386-unknown-linux-gnu          ; archive: i386
-          - target: aarch64-unknown-linux-gnu       ; archive: aarch64
-          - target: aarch64-unknown-linux-musl      ; archive: aarch64-musl
-          - target: armv7-unknown-linux-gnueabihf   ; archive: armv7hf
-          - target: arm-unknown-linux-gnueabi       ; archive: arm
-          - target: riscv64gc-unknown-linux-gnu     ; archive: riscv64
-          - target: powerpc64le-unknown-linux-gnu   ; archive: ppc64le
-          - target: s390x-unknown-linux-gnu         ; archive: s390x
+          - target: x86_64-unknown-linux-gnu
+            archive: x86_64
+          - target: x86_64-unknown-linux-musl
+            archive: x86_64-musl
+          - target: i686-unknown-linux-gnu
+            archive: i686
+          - target: i386-unknown-linux-gnu
+            archive: i386
+          - target: aarch64-unknown-linux-gnu
+            archive: aarch64
+          - target: aarch64-unknown-linux-musl
+            archive: aarch64-musl
+          - target: armv7-unknown-linux-gnueabihf
+            archive: armv7hf
+          - target: arm-unknown-linux-gnueabi
+            archive: arm
+          - target: riscv64gc-unknown-linux-gnu
+            archive: riscv64
+          - target: powerpc64le-unknown-linux-gnu
+            archive: ppc64le
+          - target: s390x-unknown-linux-gnu
+            archive: s390x
     steps:
       - name: Checkout
         uses: actions/checkout@v4
