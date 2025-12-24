@@ -14,6 +14,7 @@ RUN apk add --no-cache \
     cargo
 
 WORKDIR /noalbs
+ARG NOALBS_TAG
 RUN git clone --depth 1 --branch $NOALBS_TAG \
     https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git .
 
