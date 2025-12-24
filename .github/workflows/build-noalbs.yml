@@ -90,7 +90,7 @@ jobs:
           
           sudo dpkg --add-architecture i386
           sudo apt-get update -qq
-          sudo apt-get install -y gcc-multilib libc6-dev-i386
+          sudo apt-get install -y gcc-multilib libc6-dev-i386 libssl-dev:i386
           
           case "${{ matrix.target }}" in
             "riscv64gc-unknown-linux-gnu")
@@ -110,8 +110,10 @@ jobs:
           git clone --depth 1 https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
           cd noalbs-src
           
-          if [ "${{ github.event.inputs.noalbs_tag }}" != "main" ]; then
-            git checkout ${{ github.event.inputs.noalbs_tag }} || true
+          TAG="${{ github.event.inputs.noalbs_tag }}"
+          if [ "$TAG" != "main" ]; then
+            git fetch --depth 1 origin "refs/tags/$TAG"
+            git checkout "$TAG"
           fi
           
           export PKG_CONFIG_ALLOW_CROSS=1
