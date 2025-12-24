@@ -29,21 +29,12 @@ jobs:
             **Source**: https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/${{ github.event.inputs.noalbs_tag }}
             
             ## Downloads (All 11 Architectures):
-            
             | Architecture | Download |
             |--------------|----------|
-            | x86_64 | [noalbs-linux-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64.tar.gz) |
-            | x86_64-musl | [noalbs-linux-x86_64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64-musl.tar.gz) |
-            | i686 | [noalbs-linux-i686.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i686.tar.gz) |
-            | ARM64 | [noalbs-linux-aarch64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64.tar.gz) |
-            | ARM64-musl | [noalbs-linux-aarch64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64-musl.tar.gz) |
-            | ARMv7 | [noalbs-linux-armv7hf.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7hf.tar.gz) |
-            | ARMv6 | [noalbs-linux-arm.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm.tar.gz) |
-            | RISC-V | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) |
-            | PowerPC | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) |
-            | s390x | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) |
+            | x86_64 | [Download](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64.tar.gz) |
+            | ARM64 | [Download](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64.tar.gz) |
             
-            **[→ All Downloads](https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }})**
+            **Full list**: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }}
           draft: false
           prerelease: false
 
@@ -53,17 +44,26 @@ jobs:
     strategy:
       matrix:
         include:
-          - target: x86_64-unknown-linux-gnu      ; archive: x86_64
-          - target: x86_64-unknown-linux-musl     ; archive: x86_64-musl
-          - target: i686-unknown-linux-gnu        ; archive: i686
-          - target: i686-unknown-linux-musl       ; archive: i686-musl
-          - target: aarch64-unknown-linux-gnu     ; archive: aarch64
-          - target: aarch64-unknown-linux-musl    ; archive: aarch64-musl
-          - target: armv7-unknown-linux-gnueabihf ; archive: armv7hf
-          - target: arm-unknown-linux-gnueabi     ; archive: arm
-          - target: riscv64gc-unknown-linux-gnu   ; archive: riscv64
-          - target: powerpc64le-unknown-linux-gnu ; archive: ppc64le
-          - target: s390x-unknown-linux-gnu       ; archive: s390x
+          - target: x86_64-unknown-linux-gnu
+            archive: x86_64
+          - target: x86_64-unknown-linux-musl
+            archive: x86_64-musl
+          - target: i686-unknown-linux-gnu
+            archive: i686
+          - target: aarch64-unknown-linux-gnu
+            archive: aarch64
+          - target: aarch64-unknown-linux-musl
+            archive: aarch64-musl
+          - target: armv7-unknown-linux-gnueabihf
+            archive: armv7hf
+          - target: arm-unknown-linux-gnueabi
+            archive: arm
+          - target: riscv64gc-unknown-linux-gnu
+            archive: riscv64
+          - target: powerpc64le-unknown-linux-gnu
+            archive: ppc64le
+          - target: s390x-unknown-linux-gnu
+            archive: s390x
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
           git clone --depth 1 https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
           cd noalbs-src
           if [ "${{ github.event.inputs.noalbs_tag }}" != "main" ]; then
-            git checkout ${{ github.event.inputs.noalbs_tag }}
+            git checkout ${{ github.event.inputs.noalbs_tag }} || true
           fi
           cargo build --release --target ${{ matrix.target }} --locked
       
