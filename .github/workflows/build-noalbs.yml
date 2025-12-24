@@ -103,17 +103,17 @@ jobs:
           
           case "${{ matrix.target }}" in
             "riscv64gc-unknown-linux-gnu")
-              sudo apt-get install -y gcc-riscv64-linux-gnu libc6-dev-riscv64-cross ;;
+              sudo apt-get install -y gcc-riscv64-linux-gnu libc6-dev-riscv64-cross libssl-dev-riscv64-cross ;;
             "aarch64-unknown-linux-gnu")
-              sudo apt-get install -y gcc-aarch64-linux-gnu ;;
+              sudo apt-get install -y gcc-aarch64-linux-gnu libssl-dev-arm64-cross ;;
             "armv7-unknown-linux-gnueabihf")
-              sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross ;;
+              sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libssl-dev-armhf-cross ;;
             "s390x-unknown-linux-gnu")
-              sudo apt-get install -y gcc-s390x-linux-gnu libc6-dev-s390x-cross ;;
+              sudo apt-get install -y gcc-s390x-linux-gnu libc6-dev-s390x-cross libssl-dev-s390x-cross ;;
             "powerpc64le-unknown-linux-gnu")
-              sudo apt-get install -y gcc-powerpc64le-linux-gnu ;;
+              sudo apt-get install -y gcc-powerpc64le-linux-gnu libssl-dev-powerpc64le-cross ;;
             "arm-unknown-linux-gnueabi")
-              sudo apt-get install -y gcc-arm-linux-gnueabi ;;
+              sudo apt-get install -y gcc-arm-linux-gnueabi libc6-dev-armel-cross libssl-dev-armel-cross ;;
           esac
           
           TAG="${{ github.event.inputs.noalbs_tag }}"
