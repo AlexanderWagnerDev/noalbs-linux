@@ -84,14 +84,26 @@ jobs:
         with:
           targets: ${{ matrix.target }}
       
-      - name: Install Dependencies & Build NOALBS
+      - name: Clone & Build NOALBS
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y pkg-config libssl-dev build-essential
-          git clone --depth 1 https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
+          sudo apt-get install -y pkg-config libssl-dev build-essential gcc-riscv64-linux-gnu libc6-dev-riscv64-cross
+          
+          git clone https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
           cd noalbs-src
-          git checkout ${{ github.event.inputs.noalbs_tag }} || true
+          git fetch --tags
+          
+          if git ls-remote --tags origin | grep -q "refs/tags/${{ github.event.inputs.noalbs_tag }}"; then
+            git checkout ${{ github.event.inputs.noalbs_tag }}
+          else
+            echo "Tag ${{ github.event.inputs.noalbs_tag }} not found, using main"
+            git checkout main
+          fi
+          
           export PKG_CONFIG_ALLOW_CROSS=1
+          export PKG_CONFIG_PATH="/usr/lib/riscv64-linux-gnu/pkgconfig:/usr/lib/pkgconfig:/usr/share/pkgconfig"
+          export OPENSSL_DIR=/usr
+          
           cargo build --release --target ${{ matrix.target }}
       
       - name: Package Binary
