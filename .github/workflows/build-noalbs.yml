@@ -6,7 +6,7 @@ on:
       noalbs_tag:
         description: 'NOALBS Tag/Commit (e.g. "main", "v2.16.0", commit-hash)'
         required: true
-        default: 'main'
+        default: 'v2.16.0'
         type: string
 
 permissions:
