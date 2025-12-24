@@ -1,4 +1,4 @@
-name: NOALBS → All Linux Architectures
+name: NOALBS Linux Builder
 
 on:
   workflow_dispatch:
@@ -8,6 +8,9 @@ on:
         required: true
         default: 'main'
         type: string
+
+permissions:
+  contents: write
 
 jobs:
   create-release:
@@ -20,9 +23,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.noalbs_tag }}
-          name: "NOALBS ${{ github.event.inputs.noalbs_tag }} - All Linux Architectures"
+          name: "NOALBS ${{ github.event.inputs.noalbs_tag }} - Linux"
           body: |
-            # NOALBS ${{ github.event.inputs.noalbs_tag }} Multi-Arch Builds
+            # NOALBS ${{ github.event.inputs.noalbs_tag }} Linux Builds
             
             **Source**: https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/${{ github.event.inputs.noalbs_tag }}
             
@@ -30,9 +33,17 @@ jobs:
             | Arch | Download |
             |------|----------|
             | x86_64 | [noalbs-linux-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64.tar.gz) |
+            | x86_64-musl | [noalbs-linux-x86_64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64-musl.tar.gz) |
+            | i686 | [noalbs-linux-i686.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i686.tar.gz) |
             | ARM64 | [noalbs-linux-aarch64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64.tar.gz) |
+            | ARM64-musl | [noalbs-linux-aarch64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64-musl.tar.gz) |
+            | ARMv7 | [noalbs-linux-armv7hf.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7hf.tar.gz) |
+            | ARM | [noalbs-linux-arm.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm.tar.gz) |
+            | RISC-V | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) |
+            | PowerPC | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) |
+            | s390x | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) |
             
-            **[All 11 Downloads](https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }})**
+            **[All Downloads](https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }})**
           draft: false
           prerelease: false
         env:
