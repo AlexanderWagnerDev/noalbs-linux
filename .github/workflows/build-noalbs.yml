@@ -6,7 +6,7 @@ on:
       noalbs_tag:
         description: 'NOALBS Tag/Commit (e.g. "main", "v2.16.0", commit-hash)'
         required: true
-        default: 'v2.16.0'
+        default: 'main'
         type: string
 
 permissions:
@@ -96,7 +96,9 @@ jobs:
             "x86_64-unknown-linux-musl")
               sudo apt-get install -y musl-tools ;;
             "aarch64-unknown-linux-musl")
-              sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools ;;
+              sudo apt-get install -y musl-tools gcc-aarch64-linux-gnu
+              sudo ln -s /usr/bin/aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-musl-gcc
+              sudo ln -s /usr/aarch64-linux-gnu/lib /usr/aarch64-linux-gnu/lib64 ;;
           esac
           
           case "${{ matrix.target }}" in
