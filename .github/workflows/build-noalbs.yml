@@ -34,7 +34,6 @@ jobs:
             | x86_64        | [noalbs-linux-x86_64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64.tar.gz) |
             | x86_64-musl   | [noalbs-linux-x86_64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-x86_64-musl.tar.gz) |
             | i686          | [noalbs-linux-i686.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i686.tar.gz) |
-            | i386          | [noalbs-linux-i386.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i386.tar.gz) |
             | ARM64         | [noalbs-linux-aarch64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64.tar.gz) |
             | ARM64-musl    | [noalbs-linux-aarch64-musl.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-aarch64-musl.tar.gz) |
             | ARMv7         | [noalbs-linux-armv7hf.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7hf.tar.gz) |
@@ -61,8 +60,6 @@ jobs:
             archive: x86_64-musl
           - target: i686-unknown-linux-gnu
             archive: i686
-          - target: i386-unknown-linux-gnu
-            archive: i386
           - target: aarch64-unknown-linux-gnu
             archive: aarch64
           - target: aarch64-unknown-linux-musl
