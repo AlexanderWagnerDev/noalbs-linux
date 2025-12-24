@@ -6,7 +6,7 @@ on:
       noalbs_tag:
         description: 'NOALBS Tag/Commit (e.g. "main", "v2.16.0", commit-hash)'
         required: true
-        default: 'v2.16.0'
+        default: 'main'
         type: string
 
 permissions:
@@ -83,12 +83,7 @@ jobs:
         with:
           targets: ${{ matrix.target }}
       
-      - name: Cache Rust
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: noalbs-src
-      
-      - name: Install Dependencies & Build NOALBS
+      - name: Install Dependencies & Clone NOALBS
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y pkg-config libssl-dev build-essential
@@ -99,9 +94,9 @@ jobs:
           
           case "${{ matrix.target }}" in
             "x86_64-unknown-linux-musl")
-              sudo apt-get install -y musl-tools-x86_64-cross ;;
+              sudo apt-get install -y musl-tools ;;
             "aarch64-unknown-linux-musl")
-              sudo apt-get install -y musl-tools-aarch64-cross ;;
+              sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools ;;
           esac
           
           case "${{ matrix.target }}" in
@@ -121,8 +116,15 @@ jobs:
           
           TAG="${{ github.event.inputs.noalbs_tag }}"
           git clone --depth 1 --branch "$TAG" https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git noalbs-src
+      
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: noalbs-src
+      
+      - name: Build NOALBS
+        run: |
           cd noalbs-src
-          
           export PKG_CONFIG_ALLOW_CROSS=1
           cargo build --release --target ${{ matrix.target }}
       
