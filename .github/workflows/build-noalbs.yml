@@ -74,7 +74,7 @@ jobs:
           noalbs-linux-${{ matrix.target }}.tar.gz
           noalbs-linux-${{ matrix.target }}.tar.gz.sha256
 
-    release:
+  release:
     needs: build
     runs-on: ubuntu-latest
     steps:
