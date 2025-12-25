@@ -1,4 +1,5 @@
 name: Noalbs Linux Builder
+
 on:
   workflow_dispatch:
     inputs:
@@ -7,6 +8,9 @@ on:
         required: true
         default: 'v2.16.0'
         type: string
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -16,34 +20,31 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [amd64, i386, arm64, armv7, ppc64le, s390x, riscv64]
         include:
           - target: amd64
             platform: linux/amd64
-            archive: noalbs-linux-amd64.tar.gz
           - target: i386
             platform: linux/386
-            archive: noalbs-linux-i386.tar.gz
           - target: arm64
             platform: linux/arm64
-            archive: noalbs-linux-arm64.tar.gz
           - target: armv7
             platform: linux/arm/v7
-            archive: noalbs-linux-armv7.tar.gz
+          - target: armv6
+            platform: linux/arm/v6
           - target: ppc64le
             platform: linux/ppc64le
-            archive: noalbs-linux-ppc64le.tar.gz
           - target: s390x
             platform: linux/s390x
-            archive: noalbs-linux-s390x.tar.gz
           - target: riscv64
             platform: linux/riscv64
-            archive: noalbs-linux-riscv64.tar.gz
 
     steps:
     - uses: actions/checkout@v4
     
-    - name: Docker Buildx
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    
+    - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
     - name: Build ${{ matrix.target }}
@@ -52,28 +53,28 @@ jobs:
         context: .
         load: true
         platforms: ${{ matrix.platform }}
-        tags: noalbs-${{ matrix.target }}
+        tags: noalbs-builder-${{ matrix.target }}
         build-args: |
-          NOALBS_TAG=${{ github.event.inputs.noalbs_tag }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+          NOALBS_TAG=${{ github.event.inputs.noalbs_tag || github.ref_name }}
+        cache-from: type=gha,scope=build-${{ matrix.target }}
+        cache-to: type=gha,mode=max,scope=build-${{ matrix.target }}
         
     - name: Extract Paket
       run: |
-        docker create --name temp noalbs-${{ matrix.target }}
-        docker cp temp:/noalbs/target/*/*/release/noalbs ./noalbs
-        docker cp temp:/noalbs/config.json ./config.json
-        docker cp temp:/noalbs/.env ./.env || echo "PORT=8080" > .env
-        docker rm temp
-        tar -czf ${{ matrix.archive }} noalbs config.json .env
-        sha256sum ${{ matrix.archive }} > ${{ matrix.archive }}.sha256
+        docker create --name temp-${{ matrix.target }} noalbs-builder-${{ matrix.target }}
+        docker cp temp-${{ matrix.target }}:/app/nginx-obs-automatic-low-bitrate-switching/target/release/noalbs ./noalbs
+        docker cp temp-${{ matrix.target }}:/app/nginx-obs-automatic-low-bitrate-switching/config.json ./config.json
+        docker cp temp-${{ matrix.target }}:/app/nginx-obs-automatic-low-bitrate-switching/.env ./.env
+        docker rm temp-${{ matrix.target }}
+        tar -czf noalbs-linux-${{ matrix.target }}.tar.gz noalbs config.json .env
+        sha256sum noalbs-linux-${{ matrix.target }}.tar.gz > noalbs-linux-${{ matrix.target }}.tar.gz.sha256
         
     - uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.archive }}
+        name: noalbs-linux-${{ matrix.target }}
         path: |
-          ${{ matrix.archive }}
-          ${{ matrix.archive }}.sha256
+          noalbs-linux-${{ matrix.target }}.tar.gz
+          noalbs-linux-${{ matrix.target }}.tar.gz.sha256
 
   release:
     needs: build
@@ -97,9 +98,10 @@ jobs:
           | Arch          | Download |
           |---------------|----------|
           | x86_64        | [noalbs-linux-amd64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-amd64.tar.gz) |
-          | i686          | [noalbs-linux-i386.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i386.tar.gz) |
+          | i386          | [noalbs-linux-i386.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i386.tar.gz) |
           | ARM64         | [noalbs-linux-arm64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm64.tar.gz) |
           | ARMv7         | [noalbs-linux-armv7.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7.tar.gz) |
+          | ARMv6         | [noalbs-linux-armv6.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv6.tar.gz) |
           | RISC-V        | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) |
           | PowerPC       | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) |
           | s390x         | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) |
