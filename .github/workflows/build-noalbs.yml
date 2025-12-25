@@ -74,7 +74,7 @@ jobs:
           noalbs-linux-${{ matrix.target }}.tar.gz
           noalbs-linux-${{ matrix.target }}.tar.gz.sha256
 
-  release:
+    release:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -83,7 +83,19 @@ jobs:
         pattern: noalbs-linux-*
         path: ./releases
         merge-multiple: false
-        
+
+    - name: Read SHA256 values
+      id: sha256
+      run: |
+        echo "amd64=$(cat releases/noalbs-linux-amd64/noalbs-linux-amd64.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "i386=$(cat releases/noalbs-linux-i386/noalbs-linux-i386.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "arm64=$(cat releases/noalbs-linux-arm64/noalbs-linux-arm64.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "armv7=$(cat releases/noalbs-linux-armv7/noalbs-linux-armv7.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "armv6=$(cat releases/noalbs-linux-armv6/noalbs-linux-armv6.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "riscv64=$(cat releases/noalbs-linux-riscv64/noalbs-linux-riscv64.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "ppc64le=$(cat releases/noalbs-linux-ppc64le/noalbs-linux-ppc64le.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+        echo "s390x=$(cat releases/noalbs-linux-s390x/noalbs-linux-s390x.tar.gz.sha256 | awk '{print $1}')" >> $GITHUB_OUTPUT
+    
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v2
@@ -95,16 +107,16 @@ jobs:
           
           **Source**: https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching/tree/${{ github.event.inputs.noalbs_tag }}
           
-          | Arch          | Download |
-          |---------------|----------|
-          | x86_64        | [noalbs-linux-amd64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-amd64.tar.gz) |
-          | i386          | [noalbs-linux-i386.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i386.tar.gz) |
-          | ARM64         | [noalbs-linux-arm64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm64.tar.gz) |
-          | ARMv7         | [noalbs-linux-armv7.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7.tar.gz) |
-          | ARMv6         | [noalbs-linux-armv6.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv6.tar.gz) |
-          | RISC-V        | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) |
-          | PowerPC       | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) |
-          | s390x         | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) |
+          | Arch          | Download | SHA256 |
+          |---------------|----------|--------|
+          | x86_64        | [noalbs-linux-amd64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-amd64.tar.gz) | `${{ steps.sha256.outputs.amd64 }}` |
+          | i386          | [noalbs-linux-i386.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-i386.tar.gz) | `${{ steps.sha256.outputs.i386 }}` |
+          | ARM64         | [noalbs-linux-arm64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-arm64.tar.gz) | `${{ steps.sha256.outputs.arm64 }}` |
+          | ARMv7         | [noalbs-linux-armv7.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv7.tar.gz) | `${{ steps.sha256.outputs.armv7 }}` |
+          | ARMv6         | [noalbs-linux-armv6.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-armv6.tar.gz) | `${{ steps.sha256.outputs.armv6 }}` |
+          | RISC-V        | [noalbs-linux-riscv64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-riscv64.tar.gz) | `${{ steps.sha256.outputs.riscv64 }}` |
+          | PowerPC       | [noalbs-linux-ppc64le.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-ppc64le.tar.gz) | `${{ steps.sha256.outputs.ppc64le }}` |
+          | s390x         | [noalbs-linux-s390x.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.noalbs_tag }}/noalbs-linux-s390x.tar.gz) | `${{ steps.sha256.outputs.s390x }}` |
           
           **[All Downloads](https://github.com/${{ github.repository }}/releases/tag/${{ github.event.inputs.noalbs_tag }})**
         draft: false
