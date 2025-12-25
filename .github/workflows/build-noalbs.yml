@@ -82,7 +82,9 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
+        pattern: noalbs-linux-*
         path: ./releases
+        merge-multiple: false
         
     - name: Create Release
       id: create_release
