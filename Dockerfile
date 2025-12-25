@@ -3,21 +3,18 @@ ARG NOALBS_TAG=v2.16.0
 
 FROM alexanderwagnerdev/alpine:builder AS builder
 
-RUN apk add --no-cache \
-    musl-dev \
-    openssl-dev \
-    openssl-libs-static \
-    gcc \
-    linux-headers \
-    git \
-    rust \
-    cargo
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache build-base linux-headers gcc musl-dev git pkgconfig openssl-dev openssl-libs-static patchelf binutils rust cargo && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /noalbs
+
 ARG NOALBS_TAG
 RUN git clone --depth 1 --branch $NOALBS_TAG \
     https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git .
 
+ARG TARGETPLATFORM
 RUN case "$TARGETPLATFORM" in \
     "linux/amd64") TARGET="x86_64-unknown-linux-musl" ;; \
     "linux/386") TARGET="i686-unknown-linux-musl" ;; \
@@ -28,6 +25,9 @@ RUN case "$TARGETPLATFORM" in \
     "linux/ppc64le") TARGET="powerpc64le-unknown-linux-musl" ;; \
     *) TARGET="x86_64-unknown-linux-musl" ;; \
     esac && \
+    echo "Building for target: $TARGET" && \
+    rustup target add $TARGET && \
     PKG_CONFIG_ALLOW_CROSS=1 \
     OPENSSL_STATIC=1 \
+    CARGO_BUILD_JOBS=$(nproc) \
     cargo build --release --target $TARGET
