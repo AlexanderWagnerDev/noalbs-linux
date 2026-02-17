@@ -7,7 +7,7 @@ RUN apk update && \
 
 WORKDIR /app
 
-ARG NOALBS_TAG=v2.16.0
+ARG NOALBS_TAG=v2.16.1
 
 RUN git clone --branch $NOALBS_TAG --depth 1 https://github.com/NOALBS/nginx-obs-automatic-low-bitrate-switching.git && \
     cd nginx-obs-automatic-low-bitrate-switching && \
