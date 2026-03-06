@@ -4,15 +4,12 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 5
+      interval: "daily"
     rebase-strategy: "auto"  
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "daily"
     rebase-strategy: "auto"
     - match:
         dependency-name: "dtolnay/rust-toolchain"
@@ -50,4 +47,3 @@ versioning-strategy: "increase"
 security-updates:
   schedule:
     interval: "daily"
-  open-pull-requests-limit: 5
